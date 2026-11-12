@@ -1,0 +1,41 @@
+name: MCP Checkup Release Check
+description: Observe an MCP server from your own runner and report what was seen, unsigned. No account, nothing sent to MCP Checkup, no credential sent to a server it connects to.
+author: MCP Checkup
+inputs:
+  url:
+    description: The MCP endpoint of a server that is already running. http or https, with no user name or password. Give this or command, not both.
+    required: false
+  command:
+    description: 'A server for this Action to start in the runner, as a JSON array without a shell: the program first, then its arguments, for example ["node", "server.js"]. Give this or url, not both.'
+    required: false
+  env-names:
+    description: With command only. The names, separated by commas or line breaks, of the environment variables of this job that the started server receives. The Action never prints or stores these values.
+    required: false
+  comment:
+    description: Post one comment on the pull request, and update it on re-runs. Set to false to write only the job summary and the JSON file.
+    required: false
+    default: 'true'
+  github-token:
+    description: The runner's own token. It is used only for the requests to GitHub that the README lists, and is never sent to the server being observed.
+    required: false
+    default: ${{ github.token }}
+  output-file:
+    description: Where to write the JSON observation, as a path inside the workspace.
+    required: false
+    default: release-check-observation.json
+outputs:
+  observation-file:
+    description: The path of the JSON observation file.
+  scope:
+    description: full, or auth_gated when the server answered the handshake with HTTP 401 and only the checks that need no credential were reported.
+  protocol-revision:
+    description: The protocol revision the server declared, or empty when none was observed.
+  tool-count:
+    description: The number of tools listed, or empty when the list was not read.
+  toolset-fingerprint:
+    description: The toolset fingerprint, or empty when it was not computed.
+  schema-fingerprint:
+    description: The schema fingerprint, or empty when it was not computed.
+runs:
+  using: node24
+  main: dist/index.js
